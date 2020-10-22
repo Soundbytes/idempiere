@@ -38,5 +38,8 @@ updatedby = 0
 WHERE ad_column_id = 212644
 ;
 
+
+-- reference ad_language missing ? (present in oravle file, probably damaged. Pull from other branch?)
+
 SELECT register_migration_script('202007132043_IDEMPIERE-2999.sql') FROM dual
 ;
