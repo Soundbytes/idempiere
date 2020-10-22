@@ -183,19 +183,6 @@ public interface I_M_AttributeInstance
 	/** Get Value Date	  */
 	public Timestamp getValueDate();
 
-    /** Column name ValueInt */
-    public static final String COLUMNNAME_ValueInt = "ValueInt";
-
-	/** Set Value.
-	  * Integer Value
-	  */
-	public void setValueInt (int ValueInt);
-
-	/** Get Value.
-	  * Integer Value
-	  */
-	public int getValueInt();
-
     /** Column name ValueNumber */
     public static final String COLUMNNAME_ValueNumber = "ValueNumber";
 
@@ -208,17 +195,4 @@ public interface I_M_AttributeInstance
 	  * Numeric Value
 	  */
 	public BigDecimal getValueNumber();
-
-    /** Column name ValueTimeStamp */
-    public static final String COLUMNNAME_ValueTimeStamp = "ValueTimeStamp";
-
-	/** Set Value.
-	  * TimeStamp Value
-	  */
-	public void setValueTimeStamp (Timestamp ValueTimeStamp);
-
-	/** Get Value.
-	  * TimeStamp Value
-	  */
-	public Timestamp getValueTimeStamp();
 }

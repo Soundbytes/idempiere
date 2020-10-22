@@ -92,6 +92,21 @@ public interface I_M_Attribute
 
 	public org.compiere.model.I_AD_Reference getAD_Reference_Value() throws RuntimeException;
 
+    /** Column name AD_Val_Rule_ID */
+    public static final String COLUMNNAME_AD_Val_Rule_ID = "AD_Val_Rule_ID";
+
+	/** Set Dynamic Validation.
+	  * Dynamic Validation Rule
+	  */
+	public void setAD_Val_Rule_ID (int AD_Val_Rule_ID);
+
+	/** Get Dynamic Validation.
+	  * Dynamic Validation Rule
+	  */
+	public int getAD_Val_Rule_ID();
+
+	public org.compiere.model.I_AD_Val_Rule getAD_Val_Rule() throws RuntimeException;
+
     /** Column name AttributeValueType */
     public static final String COLUMNNAME_AttributeValueType = "AttributeValueType";
 

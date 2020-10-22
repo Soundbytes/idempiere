@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 
 import org.compiere.util.DisplayType;
-import org.compiere.util.Env;
 
 /**
  *  Product Attribute Set
@@ -36,7 +35,7 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6154044437449512042L;
+	private static final long serialVersionUID = 5697542928282761922L;
 
 
 	/**
@@ -64,7 +63,7 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	}	//	MAttributeInstance
 
 	/**
-	 * 	String Value Constructior
+	 * 	String Value Constructor
 	 *	@param ctx context
 	 *	@param M_Attribute_ID attribute
 	 *	@param M_AttributeSetInstance_ID instance
@@ -98,25 +97,7 @@ public class MAttributeInstance extends X_M_AttributeInstance
 	}	//	MAttributeInstance
 
 	/**
-	 * 	Selection Value Constructior
-	 *	@param ctx context
-	 *	@param M_Attribute_ID attribute
-	 *	@param M_AttributeSetInstance_ID instance
-	 * 	@param Value String representation for fast display
-	 *	@param trxName transaction
-	 */
-	public MAttributeInstance (Properties ctx, int M_Attribute_ID, 
-		int M_AttributeSetInstance_ID, int Value, String trxName)
-	{
-		super(ctx, 0, trxName);
-		setM_Attribute_ID (M_Attribute_ID);
-		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
-		setValueInt (Value);
-	}	//	MAttributeInstance
-	
-	
-	/**
-	 * 	Selection Value Constructior
+	 * 	Selection Value Constructor
 	 *	@param ctx context
 	 *	@param M_Attribute_ID attribute
 	 *	@param M_AttributeSetInstance_ID instance
@@ -134,69 +115,25 @@ public class MAttributeInstance extends X_M_AttributeInstance
 		setValue(Value);
 	} // MAttributeInstance
 
-	/**
-	 * 	Selection Value Constructior
-	 *	@param ctx context
-	 *	@param M_Attribute_ID attribute
-	 *	@param M_AttributeSetInstance_ID instance
-	 * 	@param Value String representation for fast display
-	 *	@param trxName transaction
-	 */
-	public MAttributeInstance(Properties ctx, int m_Attribute_ID, 
-			int m_AttributeSetInstance_ID, Timestamp value,	String trxName)
+
+	public MAttributeInstance (Properties ctx, int M_Attribute_ID, 
+		int M_AttributeSetInstance_ID, int Value, String trxName)
+	{
+		super(ctx, 0, trxName);
+		setM_Attribute_ID (M_Attribute_ID);
+		setM_AttributeSetInstance_ID (M_AttributeSetInstance_ID);
+		setValueNumber(BigDecimal.valueOf(Value));
+	} // MAttributeInstance
+
+	public MAttributeInstance(Properties ctx, int m_Attribute_ID, int m_AttributeSetInstance_ID, Timestamp value,
+			String trxName)
 	{
 		super(ctx, 0, trxName);
 		setM_Attribute_ID(m_Attribute_ID);
 		setM_AttributeSetInstance_ID(m_AttributeSetInstance_ID);
 		setValueDate(value);
-	}
+	} // MAttributeInstance
 
-	public void setValueInt(int valueInt, String value)
-	{
-		super.setValueInt(valueInt);
-		if(value == null)
-			setValue(String.valueOf(valueInt));
-		else
-			setValue(value);
-	}
-	
-	/**
-	 * 	Set ValueTimeStamp
-	 * @param value 
-	 *	@param ValueTimeStamp TimeStamp
-	 */
-	public void setValueTimeStamp(Timestamp valueTimestamp)
-	{
-		super.setValueTimeStamp(valueTimestamp);
-		if(valueTimestamp==null){
-			setValue(null);
-			return;
-		}
-		String value = null;
-		MAttribute attribute = MAttribute.get(getCtx(), getM_Attribute_ID());
-		int displayType = attribute.getAD_Reference_ID();
-		
-		//Based on reference type, Format timestamp into string value
-		if (displayType == DisplayType.Date)
-		{
-			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateFormat();
-			value = sdf.format(valueTimestamp);
-		}
-		else if (displayType == DisplayType.DateTime)
-		{
-			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getDateTimeFormat();
-			value = sdf.format(valueTimestamp);
-		}
-		else if (displayType == DisplayType.Time)
-		{
-			SimpleDateFormat sdf = Env.getLanguage(Env.getCtx()).getTimeFormat();
-			value = sdf.format(valueTimestamp);
-		}
-		
-		setValue(value);
-	}
- 	
- 	
 	/**
 	 * 	Set ValueNumber
 	 *	@param ValueNumber number
@@ -239,20 +176,63 @@ public class MAttributeInstance extends X_M_AttributeInstance
 		setValue(display.toString());
 	} // setValueNumber
 
+	/**
+	 * Set valueDate
+	 * 
+	 * @param valueDate
+	 */
 	public void setValueDate(Timestamp valueDate)
 	{
 		super.setValueDate(valueDate);
-		if (valueDate != null)
-		{
-			SimpleDateFormat sdf = new SimpleDateFormat(
-					new MAttribute(getCtx(), getM_Attribute_ID(), get_TrxName()).getDateFormat());
-			setValue(sdf.format(valueDate));
-		}
-		else
+		if (valueDate == null)
 		{
 			setValue(null);
+			return;
 		}
-	}
+
+		SimpleDateFormat sdf = null;
+		MAttribute attribute = MAttribute.get(getCtx(), getM_Attribute_ID());
+		int displayType = attribute.getAD_Reference_ID();
+
+		if (MAttribute.ATTRIBUTEVALUETYPE_Date.equals(attribute.getAttributeValueType()))
+			sdf = DisplayType.getDateFormat_JDBC();
+		// Based on reference type, Format timestamp into string value
+		else if (displayType == DisplayType.DateTime)
+			sdf = DisplayType.getTimestampFormat_Default();
+		else if (displayType == DisplayType.Time)
+			sdf = DisplayType.getTimeFormat_Default();
+		else
+			sdf = DisplayType.getDateFormat_JDBC();
+
+		setValue(sdf.format(valueDate));
+	} // setValueDate
+
+	/**
+	 * Set ValueInt
+	 * 
+	 * @param valueInt
+	 * @param value
+	 */
+	public void setValueInt(int valueInt, String value)
+	{
+		super.setValueNumber(BigDecimal.valueOf(valueInt));
+		if (value == null)
+			value = String.valueOf(valueInt);
+		setValue(value);
+	} // setValueInt
+
+	/**
+	 * Get Value as Integer
+	 * 
+	 * @return
+	 */
+	public int getValueInt()
+	{
+		if (super.getValueNumber() == null)
+			return 0;
+		else
+			return super.getValueNumber().intValue();
+	} // getValueInt
 
 	/**
 	 *	String Representation

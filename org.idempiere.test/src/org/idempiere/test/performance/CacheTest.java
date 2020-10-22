@@ -24,15 +24,20 @@
  **********************************************************************/
 package org.idempiere.test.performance;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.compiere.model.I_AD_Table;
 import org.compiere.model.MColumn;
 import org.compiere.model.MOrder;
+import org.compiere.model.MProduct;
 import org.compiere.model.MRefTable;
 import org.compiere.model.MTable;
 import org.compiere.model.MWarehouse;
 import org.compiere.model.MZoomCondition;
+import org.compiere.util.CCache;
+import org.compiere.util.CacheInterface;
 import org.compiere.util.CacheMgt;
 import org.compiere.util.Env;
 import org.idempiere.test.AbstractTestCase;
@@ -70,14 +75,143 @@ public class CacheTest extends AbstractTestCase {
 	 */
 	public void testTableCache() {
 		MTable table = MTable.get(Env.getCtx(), MOrder.Table_ID);
+		
+		//find table cache instance
+		@SuppressWarnings("rawtypes")
+		CCache tblCache = null;
+		CacheInterface[] cis = CacheMgt.get().getInstancesAsArray();
+		for(CacheInterface ci : cis) {
+			if (ci instanceof CCache<?, ?>) {				
+				@SuppressWarnings("rawtypes")
+				CCache ccache = (CCache) ci;
+				if (ccache.getName().equals(ccache.getTableName()) && ccache.getTableName().equals(MTable.Table_Name)) {
+					if (ccache.containsKey(MOrder.Table_ID)) {
+						tblCache = ccache;
+						break;
+					}
+				}
+			}
+		}
+			
+		if (tblCache == null)
+			fail("Table cache instance missing");
+		
+		long hit = tblCache.getHit();
+		
 		MColumn column = table.getColumn(MOrder.COLUMNNAME_C_Order_ID);
+		@SuppressWarnings("unused")
 		I_AD_Table table2 = column.getAD_Table();
-		assertTrue(table == table2);
+		assertEquals(hit+1, tblCache.getHit());
 		
 		//M_Warehouse of Client
-		table = MTable.get(Env.getCtx(), MWarehouse.Table_ID);
+		table = MTable.get(Env.getCtx(), MWarehouse.Table_ID);		
 		MRefTable refTable = MRefTable.get(Env.getCtx(), 197);
+		
+		tblCache = null;
+		for(CacheInterface ci : cis) {
+			if (ci instanceof CCache<?, ?>) {				
+				@SuppressWarnings("rawtypes")
+				CCache ccache = (CCache) ci;
+				if (ccache.getName().equals(ccache.getTableName()) && ccache.getTableName().equals(MTable.Table_Name)) {
+					if (ccache.containsKey(MWarehouse.Table_ID)) {
+						tblCache = ccache;
+						break;
+					}
+				}
+			}
+		}
+			
+		if (tblCache == null)
+			fail("Table cache instance missing");
+		
+		hit = tblCache.getHit();
 		table2 = refTable.getAD_Table();
-		assertTrue(table == table2);
+		assertEquals(hit+1, tblCache.getHit());
+	}
+	
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Test
+	public void testPOCacheAfterUpdate() {
+		int mulch = 137;
+		int oak = 123;
+		//init cache
+		MProduct p1 = MProduct.get(Env.getCtx(), mulch);
+		CCache<Integer, MProduct> pc = null;
+		CacheInterface[] cis = CacheMgt.get().getInstancesAsArray();
+		//find product cache instance
+		for(CacheInterface ci : cis) {
+			if (ci instanceof CCache<?, ?>) {				
+				CCache ccache = (CCache) ci;
+				if (ccache.getName().equals(ccache.getTableName()) && ccache.getTableName().equals(MProduct.Table_Name)) {
+					if (ccache.containsKey(mulch)) {
+						pc = ccache;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (pc == null)
+			fail("Product cache instance missing");
+		
+		//second get, hit should increase
+		long hit = pc.getHit();
+		p1 = MProduct.get(Env.getCtx(), mulch);
+		assertEquals(mulch, p1.getM_Product_ID());
+		assertTrue(pc.getHit() > hit, "Second get of product Mulch, cache hit should increase");
+		
+		//first get for p2, miss should increase
+		long miss = pc.getMiss();
+		MProduct p2 = MProduct.get(Env.getCtx(), oak);
+		assertEquals(oak, p2.getM_Product_ID());
+		assertTrue(pc.getMiss() > miss, "First get of product Oak, cache miss should increase");
+		
+		//second get for p2, hit should increase
+		hit = pc.getHit();
+		p2 = MProduct.get(Env.getCtx(), oak);
+		assertEquals(oak, p2.getM_Product_ID());
+		assertTrue(pc.getHit() > hit, "Second get of product Oak, cache hit should increase");
+		
+		p2 = new MProduct(Env.getCtx(), p2, getTrxName());
+		p2.setDescription("Test Update @ " + System.currentTimeMillis());
+		p2.saveEx();
+		
+		//get after p2 update, miss should increase
+		miss = pc.getMiss();
+		p2 = MProduct.get(Env.getCtx(), oak);
+		assertEquals(oak, p2.getM_Product_ID());
+		assertTrue(pc.getMiss() > miss, "Get of product Oak after update of product Oak, cache miss should increase");
+		
+		//cache for p1 not effected by p2 update, hit should increase
+		hit = pc.getHit();
+		p1 = MProduct.get(Env.getCtx(), mulch);
+		assertEquals(mulch, p1.getM_Product_ID());
+		assertTrue(pc.getHit() > hit, "Get of product Mulch after update of product Oak, cache hit should increase");
+		
+		//create p3 to test delete
+		MProduct p3 = new MProduct(Env.getCtx(), 0, getTrxName());
+		String name = "Test@"+System.currentTimeMillis();
+		p3.setValue(name);
+		p3.setName(name);
+		p3.setM_Product_Category_ID(p1.getM_Product_Category_ID());
+		p3.setC_UOM_ID(p1.getC_UOM_ID());
+		p3.setC_TaxCategory_ID(p1.getC_TaxCategory_ID());
+		p3.saveEx();
+		
+		p3.deleteEx(true);
+		
+		//cache for p2 not effected by p3 delete, hit should increase
+		hit = pc.getHit();
+		p2 = MProduct.get(Env.getCtx(), oak);
+		assertEquals(oak, p2.getM_Product_ID());
+		assertTrue(pc.getHit() > hit, "Get of product Oak after delete of product Mulch, cache hit should increase");
+		
+		//test update when cache is empty
+		CacheMgt.get().reset();
+		p2 = new MProduct(Env.getCtx(), p2, getTrxName());
+		p2.setDescription("Test1@"+System.currentTimeMillis());
+		p2.saveEx();
+		
+		rollback();
 	}
 }

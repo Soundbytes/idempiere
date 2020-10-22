@@ -83,7 +83,7 @@ public class GridField
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -632698704437797186L;
+	private static final long serialVersionUID = -632698704437797176L;
 
 	/**
 	 *  Field Constructor.
@@ -505,6 +505,13 @@ public class GridField
 					return false;
 				if (!MRole.getDefault(ctx, false).isColumnAccess(AD_Table_ID, m_vo.AD_Column_ID, false))
 					return false;
+				if (getDisplayType() == DisplayType.Button && getAD_Process_ID() > 0) {
+					// Verify access to process for buttons
+					Boolean access = MRole.getDefault().getProcessAccess(getAD_Process_ID());
+					if (access == null || !access.booleanValue())
+						return false;
+				}
+				
 			}
 		}
 			
@@ -2572,6 +2579,7 @@ public class GridField
 			field.m_vo = field.m_vo.clone(ctx, field.m_vo.WindowNo, field.m_vo.TabNo, 
 					field.m_vo.AD_Window_ID, field.m_vo.AD_Tab_ID, field.m_vo.tabReadOnly);
 			field.m_vo.lookupInfo = null;
+			field.m_lookup = null;
 			field.m_propertyChangeListeners = new PropertyChangeSupport(this);
 			return field;
 		} catch (CloneNotSupportedException e) {
