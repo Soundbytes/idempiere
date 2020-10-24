@@ -7,14 +7,13 @@ echo $STATE
 #echo "Press any key to continue . . ."
 #read -n 1
 
-if [ "$STATE" == "live" ] 
+if [ "$STATE" != "dev" ] 
 then
 cd ~/dev-id &&
-mv data data_live &&
-mv data_dev data &&
-cp data/idempiere.properties ./idempiere.properties &&
+ln -sfn ./data_dev data &&
+ln -sf ./data_dev/idempiere.properties idempiere.properties &&
 echo db switch to DEV success ||
-echo db switch to DEV failed
+echo db switch to DEV failed; exit 1
 else
-echo dh switch to DEV not required 
+echo db switch to DEV not required 
 fi
