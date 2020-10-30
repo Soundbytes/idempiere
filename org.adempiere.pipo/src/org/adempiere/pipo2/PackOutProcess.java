@@ -19,6 +19,9 @@
 package org.adempiere.pipo2;
 
 import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.DBException;
 import org.compiere.model.I_AD_EntityType;
 import org.compiere.model.I_AD_Form;
 import org.compiere.model.I_AD_ImpFormat;
@@ -48,6 +52,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.Query;
 import org.compiere.model.X_AD_Package_Exp_Detail;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 
 /**
@@ -188,6 +193,8 @@ public class PackOutProcess extends SvrProcess
 			return "SQLStatement";
 		else if (X_AD_Package_Exp_Detail.TYPE_SQLMandatory.equals(type))
 			return "SQLMandatory";
+		else if (X_AD_Package_Exp_Detail.TYPE_SQLFromQuery.equals(type))  // Andreas Sumerauer 2020-10-29
+			return "SQLMandatory";
 		else if (X_AD_Package_Exp_Detail.TYPE_Table.equals(type))
 			return I_AD_Table.Table_Name;
 		else if (X_AD_Package_Exp_Detail.TYPE_Window.equals(type))
@@ -211,6 +218,32 @@ public class PackOutProcess extends SvrProcess
 			properties.put(DataElementParameters.SQL_STATEMENT, dtl.getSQLStatement());
 		} else if (MPackageExpDetail.TYPE_SQLStatement.equals(type) || MPackageExpDetail.TYPE_SQLMandatory.equals(type)) {
 			properties.put(SQLElementParameters.SQL_STATEMENT, dtl.getSQLStatement());
+			properties.put(SQLElementParameters.DB_TYPE, dtl.getDBType());
+		} else if (MPackageExpDetail.TYPE_SQLFromQuery.equals(type)) { // Andreas Sumerauer 2020-10-29
+			type = MPackageExpDetail.TYPE_SQLMandatory;
+			String sqlQuery = dtl.getSQLStatement();
+	        PreparedStatement pstmt = null;
+	        ResultSet rs = null;
+	        StringBuilder sqlStatement = new StringBuilder();
+	        try
+	        {
+	            pstmt = DB.prepareStatement(sqlQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, null);
+	            rs = pstmt.executeQuery();
+	            while (rs.next())
+	            {
+	            	sqlStatement.append(rs.getString(1)).append(";\n");
+	            }
+	        }
+	        catch (SQLException e)
+	        {					
+	            throw new DBException(e, sqlStatement.toString());
+	        }
+	        finally
+	        {
+	            DB.close(rs, pstmt);
+	            rs = null; pstmt = null;
+	        } 
+			properties.put(SQLElementParameters.SQL_STATEMENT, sqlStatement.toString());
 			properties.put(SQLElementParameters.DB_TYPE, dtl.getDBType());
 		} else if (MPackageExpDetail.TYPE_File_CodeOrOther.equals(type)) {
 			properties.put(FileElementParameters.TARGET_DIRECTORY, dtl.getTarget_Directory());
