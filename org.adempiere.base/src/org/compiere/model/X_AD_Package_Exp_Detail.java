@@ -943,6 +943,8 @@ public class X_AD_Package_Exp_Detail extends PO implements I_AD_Package_Exp_Deta
 	public static final String TYPE_EntityType = "ET";
 	/** SQL Mandatory = SQM */
 	public static final String TYPE_SQLMandatory = "SQM";
+	/** SQL From Query = SQQ */
+	public static final String TYPE_SQLFromQuery = "SQQ";
 	/** Info Window = IW */
 	public static final String TYPE_InfoWindow = "IW";
 	/** Data Single = DS */
