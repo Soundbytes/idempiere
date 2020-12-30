@@ -473,6 +473,15 @@ public abstract class CreateFromShipment extends CreateFrom
 			}
 		}
 		
+		// Try to get from locator field
+		if (locator == null)
+		{
+			if (defaultLocator_ID > 0)
+			{
+				locator = MLocator.get(Env.getCtx(), defaultLocator_ID);
+			}
+		}		
+		
 		// Try to use default locator from Order Warehouse
 		if (locator == null && p_order != null && p_order.getM_Warehouse_ID() == getM_Warehouse_ID())
 		{
@@ -482,14 +491,7 @@ public abstract class CreateFromShipment extends CreateFrom
 				locator = wh.getDefaultLocator();
 			}
 		}
-		// Try to get from locator field
-		if (locator == null)
-		{
-			if (defaultLocator_ID > 0)
-			{
-				locator = MLocator.get(Env.getCtx(), defaultLocator_ID);
-			}
-		}
+
 		// Validate Warehouse
 		if (locator == null || locator.getM_Warehouse_ID() != getM_Warehouse_ID())
 		{
