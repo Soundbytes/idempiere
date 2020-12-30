@@ -161,28 +161,17 @@ public class MViewComponent extends X_AD_ViewComponent implements ImmutablePOSup
 				sb.append(", ");
 			String colSQL = vc.getColumnSQL();
 			
-			if (colSQL == null || colSQL.toUpperCase().equals("NULL"))
-			{
-				String dt = vc.getDBDataType();
-				if (dt != null)
-				{
-					if (dt.equals(MViewColumn.DBDATATYPE_CharacterFixed) || 
-							dt.equals(MViewColumn.DBDATATYPE_CharacterVariable))
-						colSQL = "NULLIF('a','a')";
-					else if (dt.equals(MViewColumn.DBDATATYPE_Decimal) || 
-							dt.equals(MViewColumn.DBDATATYPE_Integer) ||
-							dt.equals(MViewColumn.DBDATATYPE_Number))
-						colSQL = "NULLIF(1,1)";
-					else if (dt.equals(MViewColumn.DBDATATYPE_Timestamp))
-						colSQL = "NULL";
-				}
-				else
-					colSQL = "NULL";
-			}
+			if (colSQL == null || colSQL.toUpperCase().equals("NULL")) colSQL = "NULL";
+			String dt = vc.getMColumn().getSQLDataType();
 			
-			sb.append(DB.getDatabase().quoteColumnName(colSQL));
+			sb.append("(")
+				.append(DB.getDatabase().quoteColumnName(colSQL))
+				.append(")::")
+				.append(dt);
+
 			if (!colName.equals("*"))
-				sb.append(" AS ").append(DB.getDatabase().quoteColumnName(colName));
+				sb.append(" AS ")
+					.append(DB.getDatabase().quoteColumnName(colName));
 		}
 		
 		sb.append(" ").append(getFromClause());

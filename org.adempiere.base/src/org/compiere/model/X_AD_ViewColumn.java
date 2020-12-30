@@ -29,7 +29,7 @@ public class X_AD_ViewColumn extends PO implements I_AD_ViewColumn, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200413L;
+	private static final long serialVersionUID = 20201027L;
 
     /** Standard Constructor */
     public X_AD_ViewColumn (Properties ctx, int AD_ViewColumn_ID, String trxName)
@@ -39,7 +39,6 @@ public class X_AD_ViewColumn extends PO implements I_AD_ViewColumn, I_Persistent
         {
 			setAD_ViewColumn_ID (0);
 			setAD_ViewComponent_ID (0);
-			setColumnName (null);
 			setEntityType (null);
 // @SQL=select get_sysconfig('DEFAULT_ENTITYTYPE','U',0,0) from dual
         } */
@@ -72,6 +71,34 @@ public class X_AD_ViewColumn extends PO implements I_AD_ViewColumn, I_Persistent
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	public org.compiere.model.I_AD_Column getAD_Column() throws RuntimeException
+    {
+		return (org.compiere.model.I_AD_Column)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getAD_Column_ID(), get_TrxName());	}
+
+	/** Set Column.
+		@param AD_Column_ID 
+		Column in the table
+	  */
+	public void setAD_Column_ID (int AD_Column_ID)
+	{
+		if (AD_Column_ID < 1) 
+			set_Value (COLUMNNAME_AD_Column_ID, null);
+		else 
+			set_Value (COLUMNNAME_AD_Column_ID, Integer.valueOf(AD_Column_ID));
+	}
+
+	/** Get Column.
+		@return Column in the table
+	  */
+	public int getAD_Column_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_AD_Column_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
 
 	/** Set Database View Column.
 		@param AD_ViewColumn_ID Database View Column	  */
@@ -132,23 +159,6 @@ public class X_AD_ViewColumn extends PO implements I_AD_ViewColumn, I_Persistent
 		return ii.intValue();
 	}
 
-	/** Set DB Column Name.
-		@param ColumnName 
-		Name of the column in the database
-	  */
-	public void setColumnName (String ColumnName)
-	{
-		set_Value (COLUMNNAME_ColumnName, ColumnName);
-	}
-
-	/** Get DB Column Name.
-		@return Name of the column in the database
-	  */
-	public String getColumnName () 
-	{
-		return (String)get_Value(COLUMNNAME_ColumnName);
-	}
-
 	/** Set Column SQL.
 		@param ColumnSQL 
 		Virtual Column (r/o)
@@ -166,37 +176,25 @@ public class X_AD_ViewColumn extends PO implements I_AD_ViewColumn, I_Persistent
 		return (String)get_Value(COLUMNNAME_ColumnSQL);
 	}
 
-	/** DBDataType AD_Reference_ID=200070 */
-	public static final int DBDATATYPE_AD_Reference_ID=200070;
-	/** Binary LOB = B */
-	public static final String DBDATATYPE_BinaryLOB = "B";
-	/** Character Fixed = C */
-	public static final String DBDATATYPE_CharacterFixed = "C";
-	/** Decimal = D */
-	public static final String DBDATATYPE_Decimal = "D";
-	/** Integer = I */
-	public static final String DBDATATYPE_Integer = "I";
-	/** Character LOB = L */
-	public static final String DBDATATYPE_CharacterLOB = "L";
-	/** Number = N */
-	public static final String DBDATATYPE_Number = "N";
-	/** Timestamp = T */
-	public static final String DBDATATYPE_Timestamp = "T";
-	/** Character Variable = V */
-	public static final String DBDATATYPE_CharacterVariable = "V";
 	/** Set Database Data Type.
 		@param DBDataType Database Data Type	  */
-	public void setDBDataType (String DBDataType)
+	public void setDBDataType (boolean DBDataType)
 	{
-
-		set_Value (COLUMNNAME_DBDataType, DBDataType);
+		set_Value (COLUMNNAME_DBDataType, Boolean.valueOf(DBDataType));
 	}
 
 	/** Get Database Data Type.
 		@return Database Data Type	  */
-	public String getDBDataType () 
+	public boolean isDBDataType () 
 	{
-		return (String)get_Value(COLUMNNAME_DBDataType);
+		Object oo = get_Value(COLUMNNAME_DBDataType);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Description.

@@ -49,6 +49,21 @@ public interface I_AD_ViewColumn
 	  */
 	public int getAD_Client_ID();
 
+    /** Column name AD_Column_ID */
+    public static final String COLUMNNAME_AD_Column_ID = "AD_Column_ID";
+
+	/** Set Column.
+	  * Column in the table
+	  */
+	public void setAD_Column_ID (int AD_Column_ID);
+
+	/** Get Column.
+	  * Column in the table
+	  */
+	public int getAD_Column_ID();
+
+	public org.compiere.model.I_AD_Column getAD_Column() throws RuntimeException;
+
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
@@ -91,19 +106,6 @@ public interface I_AD_ViewColumn
 
 	public org.compiere.model.I_AD_ViewComponent getAD_ViewComponent() throws RuntimeException;
 
-    /** Column name ColumnName */
-    public static final String COLUMNNAME_ColumnName = "ColumnName";
-
-	/** Set DB Column Name.
-	  * Name of the column in the database
-	  */
-	public void setColumnName (String ColumnName);
-
-	/** Get DB Column Name.
-	  * Name of the column in the database
-	  */
-	public String getColumnName();
-
     /** Column name ColumnSQL */
     public static final String COLUMNNAME_ColumnSQL = "ColumnSQL";
 
@@ -137,10 +139,10 @@ public interface I_AD_ViewColumn
     public static final String COLUMNNAME_DBDataType = "DBDataType";
 
 	/** Set Database Data Type	  */
-	public void setDBDataType (String DBDataType);
+	public void setDBDataType (boolean DBDataType);
 
 	/** Get Database Data Type	  */
-	public String getDBDataType();
+	public boolean isDBDataType();
 
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";

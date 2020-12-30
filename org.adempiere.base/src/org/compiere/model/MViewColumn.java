@@ -133,5 +133,17 @@ public class MViewColumn extends X_AD_ViewColumn implements ImmutablePOSupport {
 		makeImmutable();
 		return this;
 	}
+	
+	public MColumn getMColumn() throws RuntimeException
+    {
+		return (org.compiere.model.MColumn)MTable.get(getCtx(), org.compiere.model.I_AD_Column.Table_Name)
+			.getPO(getAD_Column_ID(), get_TrxName());	
+	}
+	
+	public String getColumnName() {
+		return getAD_Column().getColumnName();
+	}
+	
+	
 
 }
