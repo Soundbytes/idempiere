@@ -522,7 +522,10 @@ public class RolePanel extends Window implements EventListener<Event>, Deferrabl
                 }
                 if (lstWarehouse.getSelectedIndex() == -1 && lstWarehouse.getItemCount() > 0) {
                 	m_show = true; // didn't find default warehouse
-                	lstWarehouse.setSelectedIndex(0);
+                	// Andreas Sumerauer 12/28/2020
+                	// commented out to enable null selection for warehouse even with an organization selected. 
+                	
+                	// lstWarehouse.setSelectedIndex(0);
                 }
             }
             //
