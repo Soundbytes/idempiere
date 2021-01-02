@@ -552,10 +552,10 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 					// see WLocationEditor firing twice ValueChangeEvent (first with null and then with value)
 				} else {
 					mTable.setValueAt(evt.getNewValue(), row, col);
-					field.setValue(evt.getNewValue(), field.getGridTab().getTableModel().isInserting());
+					// field.setValue(evt.getNewValue(), field.getGridTab().getTableModel().isInserting());
 					gridTab.processFieldChange(field);
 				}
-	            // Refresh the list on dependant fields
+	            // Refresh the list on dependent fields
 	            ArrayList<GridField> dependants = gridTab.getDependantFields(columnName);
 	    		for (GridField dependentField : dependants)
 	    		{
