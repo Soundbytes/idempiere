@@ -215,6 +215,8 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	//Contains currently selected rows
 	private ArrayList<Integer> selection = null;
 	public boolean isQuickForm = false;
+
+	private boolean m_dataStatusFire = true;
 	
 	// Context property names:
 	public static final String CTX_KeyColumnName = "_TabInfo_KeyColumnName";
@@ -2346,30 +2348,40 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		}
 		else    
 		{
-			//  Redistribute Info with current row info
-			//  Avoid firing of duplicate event
-			boolean fire = true;
-			if (m_lastDataStatusEvent != null)
-			{
-				if (System.currentTimeMillis() - m_lastDataStatusEventTime < 200)
+			// Check if we are in silent mode
+			if(m_dataStatusFire) {
+				//  Redistribute Info with current row info
+				//  Avoid firing of duplicate event
+				boolean fire = true;
+				if (m_lastDataStatusEvent != null)
 				{
-					if (m_lastDataStatusEvent.isEqual(m_DataStatusEvent))
+					if (System.currentTimeMillis() - m_lastDataStatusEventTime < 200)
 					{
-						fire = false;
+						if (m_lastDataStatusEvent.isEqual(m_DataStatusEvent))
+						{
+							fire = false;
+						}
 					}
 				}
+				
+				if (fire)
+					fireDataStatusChanged(m_DataStatusEvent);
 			}
-			
-			if (fire)
-				fireDataStatusChanged(m_DataStatusEvent);
 		}
-
 		//reset
 		m_lastDataStatusEventTime = System.currentTimeMillis();
 		m_lastDataStatusEvent = m_DataStatusEvent;
 		m_DataStatusEvent = null;
 	//	log.fine("dataStatusChanged #" + m_vo.TabNo + "- fini", e.toString());
 	}	//	dataStatusChanged
+	
+	public void setDataStatusFire(boolean fire) {
+		m_dataStatusFire = fire;
+	}
+	
+	public boolean getDataStatusFire() {
+		return m_dataStatusFire;
+	}	
 
 	/**
 	 *	Inform Listeners and build WHO info
@@ -2756,6 +2768,35 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		//
 		return ""; // processFieldChange (field); // here we don't need to call processFieldChange, it was called on GridController.dataStatusChanged
 	}   //  setValue
+	
+	/**
+	 *  Set New Value & do not call Callout
+	 *  @param columnName database column name
+	 *  @param value value
+	 *  @return error message or ""
+	 *  @author Andreas Sumerauer
+	 */
+	public String setValueSilent (String columnName, Object value)
+	{
+		if (columnName == null)
+			return "NoColumn";
+		return setValueSilent(m_mTable.getField(columnName), value);
+	}   //  setValueSilent
+
+	/**
+	 *  Set New Value & do not call Callout
+	 *  @param field field
+	 *  @param value value
+	 *  @return error message or ""
+	 *  @author Andreas Sumerauer
+	 */
+	public String setValueSilent (GridField field, Object value)
+	{
+		setDataStatusFire(false);
+		String err = setValue (field, value);
+		setDataStatusFire(true);
+		return err;
+	}   //  setValueSilent
 
 	/**
 	 * 	Is Processed
