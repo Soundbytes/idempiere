@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -519,18 +520,27 @@ public abstract class AbstractElementHandler implements ElementHandler {
 			throw new IllegalStateException("2Pack doesn't work with record without official Id and UUID -> " + po.getUUIDColumnName());
 		}
     }
+    
+    /**
+    *
+    * list of entitytypes to exclude from processing
+    */
+	protected List<String> etypeExcludes = new ArrayList<String>(Arrays.asList("TGI", "SBSP", "WMV_xx")); // Andreas Sumerauer 2020-10-24
 
-	protected boolean isPackOutElement(PIPOContext ctx, PO element) {
+	protected boolean isPackOutElement(PIPOContext ctx, PO element) { 
 		if (ctx.packOut.getFromDate() != null) {
 			if (element.getUpdated().compareTo(ctx.packOut.getFromDate()) < 0) {
 				return false;
 			}
 		}
-		if (!ctx.packOut.isExportDictionaryEntity() && element.get_ColumnIndex("EntityType") >= 0) {
+		if (element.get_ColumnIndex("EntityType") >= 0) {
 			Object entityType = element.get_Value("EntityType");
-			if (X_AD_EntityType.ENTITYTYPE_Dictionary.equals(entityType)) {
+			if (!ctx.packOut.isExportDictionaryEntity() && X_AD_EntityType.ENTITYTYPE_Dictionary.equals(entityType)) {
 				return false;
 			}
+			for(String ex : etypeExcludes) { // Andreas Sumerauer 2020-10-24
+				if (ex.equals(entityType)) return false;
+			} 
 		}
 		return true;
 	}        
