@@ -112,7 +112,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8443012394354164942L;
+	private static final long serialVersionUID = 5086068543834849233L;
 
 	public static final String DEFAULT_STATUS_MESSAGE = "NavigateOrUpdate";
 
@@ -3478,7 +3478,7 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		// minimum between AD_Tab.MaxQueryRecords and AD_Role.MaxQueryRecords
 		int roleMaxQueryRecords = MRole.getDefault().getMaxQueryRecords();
 		int tabMaxQueryRecords = m_vo.MaxQueryRecords;
-		if (roleMaxQueryRecords > 0 && roleMaxQueryRecords < tabMaxQueryRecords)
+		if (roleMaxQueryRecords > 0 && (roleMaxQueryRecords < tabMaxQueryRecords || tabMaxQueryRecords == 0))
 			tabMaxQueryRecords = roleMaxQueryRecords;
 		return tabMaxQueryRecords;
 	}
@@ -3509,5 +3509,13 @@ public class GridTab implements DataStatusListener, Evaluatee, Serializable
 		int max = getMaxQueryRecords();
 		return max > 0 && noRecords > max;
 	}	//	isQueryMax
+
+	/***
+	 * reset to empty
+	 */
+	public void reset() {
+		m_mTable.reset();
+		setCurrentRow(0, true);
+	}
 
 }	//	GridTab
