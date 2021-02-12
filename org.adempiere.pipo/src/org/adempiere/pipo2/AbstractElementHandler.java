@@ -525,7 +525,7 @@ public abstract class AbstractElementHandler implements ElementHandler {
     *
     * list of entitytypes to exclude from processing
     */
-	protected List<String> etypeExcludes = new ArrayList<String>(Arrays.asList("TGI", "SBSP", "WMV_xx")); // Andreas Sumerauer 2020-10-24
+	protected List<String> etypeExcludes = new ArrayList<String>(Arrays.asList("TGI", "SBSP", "WMV_xx", "WMV_01", "WMV_02")); // Andreas Sumerauer 2020-10-24
 
 	protected boolean isPackOutElement(PIPOContext ctx, PO element) { 
 		if (ctx.packOut.getFromDate() != null) {
