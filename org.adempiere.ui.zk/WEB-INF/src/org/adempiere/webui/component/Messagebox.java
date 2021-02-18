@@ -29,7 +29,6 @@ import org.adempiere.webui.factory.ButtonFactory;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.util.ZKUpdateUtil;
-import org.compiere.util.CLogger;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -49,6 +48,7 @@ import org.zkoss.zul.Vbox;
 *
 * @author  Niraj Sohun
 * @date    Jul 31, 2007
+* @contributor Andreas Sumerauer IDEMPIERE-4702
 */
 
 public class Messagebox extends Window implements EventListener<Event>
@@ -58,8 +58,6 @@ public class Messagebox extends Window implements EventListener<Event>
 	 */
 	private static final long serialVersionUID = 8928526331932742124L;
 	
-	private static final CLogger log = CLogger.getCLogger(Messagebox.class);
-
 	private static final String MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; overflow: auto; max-height: 350pt; min-width: 230pt; max-width: 450pt;";	
 	private static final String SMALLER_MESSAGE_PANEL_STYLE = "text-align:left; word-break: break-all; overflow: auto; max-height: 350pt; min-width: 180pt; ";
 	private String msg = new String("");
@@ -358,7 +356,8 @@ public class Messagebox extends Window implements EventListener<Event>
 		return msg.show(message, title, buttons, icon, editor, callback, modal);
 	}
 	
-    @Listen("onCancel = #form")
+    // Andreas Sumerauer IDEMPIERE 4702
+	@Listen("onCancel")
     public void onCancel() throws Exception
     {
     	returnValue = CANCEL;
@@ -403,7 +402,6 @@ public class Messagebox extends Window implements EventListener<Event>
 	}
 	
 	private void close() {
-		SessionManager.getSessionApplication().getKeylistener().removeEventListener(Events.ON_CTRL_KEY, this);
 		try {
 			this.detach();
 		} catch (NullPointerException npe) {
