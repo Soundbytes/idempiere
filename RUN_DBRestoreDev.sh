@@ -43,7 +43,7 @@ then
 fi
 if [ -z "$PROPFILE" ]
 then
-    echo "There is no idempiere.properties in folder $IDEMPIERE_HOME.
+    echo "There is no idempiereEnv.properties in folder $IDEMPIERE_HOME.
 Please run first install.app or install.console.app within eclipse"
     exit 904
 fi

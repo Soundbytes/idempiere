@@ -38,9 +38,9 @@ then
 fi
 if [ -z "$PROPFILE" ]
 then
-    if [ -s "$IDEMPIERE_HOME/idempiere.properties" ]
+    if [ -s "$IDEMPIERE_HOME/idempiereEnv.properties" ]
     then
-        PROPFILE="$IDEMPIERE_HOME/idempiere.properties"
+        PROPFILE="$IDEMPIERE_HOME/idempiereEnv.properties"
     fi
 fi
 if [ -z "$PROPFILE" ]
@@ -50,19 +50,26 @@ Please run first install.app or install.console.app within eclipse"
     exit 1
 fi
 cd "$IDEMPIERE_HOME" || exit
-CONN=$(grep "^Connection=.*type" "$PROPFILE")
-if [ -z "$CONN" ]
-then
-    echo "There is no Connection definition in the properties file $PROPFILE, or Connection is encrypted"
-    exit 1
-fi
-ADEMPIERE_DB_NAME="$(expr "$CONN" : ".*DBname.=\(.*\),BQ.=")"
-ADEMPIERE_DB_SERVER="$(expr "$CONN" : ".*DBhost.=\(.*\),DBport.=")"
-ADEMPIERE_DB_PORT="$(expr "$CONN" : ".*DBport.=\(.*\),DBname.=")"
-ADEMPIERE_DB_USER="$(expr "$CONN" : ".*UID.=\(.*\),PWD.=")"
-ADEMPIERE_DB_PASSWORD="$(expr "$CONN" : ".*PWD.=\(.*\)]")"
-ADEMPIERE_DB_PATH="$(expr "$CONN" : ".*type.=\(.*\),DBhost.=")"
-ADEMPIERE_DB_PATH="${ADEMPIERE_DB_PATH,,}"
+
+#CONN=$(grep "^Connection=.*type" "$PROPFILE")
+#if [ -z "$CONN" ]
+#then
+#    echo "There is no Connection definition in the properties file $PROPFILE, or Connection is encrypted"
+#    exit 1
+#fi
+#ADEMPIERE_DB_NAME="$(expr "$CONN" : ".*DBname.=\(.*\),BQ.=")"
+#ADEMPIERE_DB_SERVER="$(expr "$CONN" : ".*DBhost.=\(.*\),DBport.=")"
+#ADEMPIERE_DB_PORT="$(expr "$CONN" : ".*DBport.=\(.*\),DBname.=")"
+#ADEMPIERE_DB_USER="$(expr "$CONN" : ".*UID.=\(.*\),PWD.=")"
+#ADEMPIERE_DB_PASSWORD="$(expr "$CONN" : ".*PWD.=\(.*\)]")"
+#ADEMPIERE_DB_PATH="$(expr "$CONN" : ".*type.=\(.*\),DBhost.=")"
+#ADEMPIERE_DB_PATH="${ADEMPIERE_DB_PATH,,}"
+
+source "$PROPFILE"
+
+echo ADEMPIERE_DB_PASSWORD $ADEMPIERE_DB_PASSWORD
+echo ADEMPIERE_DB_USER $ADEMPIERE_DB_USER
+echo ADEMPIERE_DB_NAME $ADEMPIERE_DB_NAME
 
 export IDEMPIERE_HOME
 export ADEMPIERE_DB_NAME
