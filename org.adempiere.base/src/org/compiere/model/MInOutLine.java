@@ -39,7 +39,7 @@ import org.compiere.util.Util;
  *  		<li>BF [ 2784194 ] Check Warehouse-Locator conflict
  *  			https://sourceforge.net/tracker/?func=detail&aid=2784194&group_id=176962&atid=879332
  */
-public class MInOutLine extends X_M_InOutLine
+public class MInOutLine extends X_M_InOutLine implements IBaseLine
 {
 	/**
 	 *

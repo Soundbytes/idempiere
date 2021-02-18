@@ -64,7 +64,7 @@ import org.compiere.util.TimeUtil;
  *  Modifications: Added RMA functionality (Ashley Ramdass)
  *  Modifications: Generate DocNo^ instead of using a new number whan an invoice is reversed (Diego Ruiz-globalqss)
  */
-public class MInvoice extends X_C_Invoice implements DocAction
+public class MInvoice extends X_C_Invoice implements DocAction, IDocBase
 {
 	/**
 	 * 

@@ -64,7 +64,7 @@ import org.compiere.util.TimeUtil;
  * 			<li>BF [ 2993853 ] Voiding/Reversing Receipt should void confirmations
  * 				https://sourceforge.net/tracker/?func=detail&atid=879332&aid=2993853&group_id=176962
  */
-public class MInOut extends X_M_InOut implements DocAction
+public class MInOut extends X_M_InOut implements DocAction, IDocBase
 {
 	/**
 	 * 

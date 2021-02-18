@@ -47,7 +47,7 @@ import org.compiere.util.Msg;
  * 				https://sourceforge.net/tracker/?func=detail&aid=2804142&group_id=176962&atid=879332
  * @author red1 FR: [ 2214883 ] Remove SQL code and Replace for Query
  */
-public class MInvoiceLine extends X_C_InvoiceLine
+public class MInvoiceLine extends X_C_InvoiceLine implements IBaseLine
 {
 	/**
 	 * 
