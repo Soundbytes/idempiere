@@ -1868,9 +1868,25 @@ public class FindWindow extends Window implements EventListener<Event>, ValueCha
 	            	else
 	            		m_query.addRestriction("NOT (" + clause + ")", and, openBrackets);
 	            }
-	            else
+	            else if (MQuery.OPERATORS[MQuery.NOT_EQUAL_INDEX].getValue().equals(Operator)) {
+	            	String fallback = null;
+	            	if (DisplayType.isID(field.getDisplayType()) || DisplayType.isLookup(field.getDisplayType())) 
+	            		fallback = "-1";
+	            	else if (DisplayType.isNumeric(field.getDisplayType())) 
+	            		fallback = "0";
+	            	else if (DisplayType.isText(field.getDisplayType())) 
+	            		fallback = "''";
+	            	else if (DisplayType.isDate(field.getDisplayType())) 
+	            		fallback = "0";
+	            	
+	            	m_query.addRestriction(fallback == null ? ColumnSQL : "COALESCE(" + ColumnSQL + ", " + fallback + ")", 
+	            			Operator, parsedValue, infoName, 
+	            			infoDisplay, and, openBrackets);
+	            }
+	            else {
 	            	m_query.addRestriction(ColumnSQL, Operator, parsedValue,
 	            			infoName, infoDisplay, and, openBrackets);
+	            }
 
 	            appendCode(code, ColumnName, Operator, value != null ? value.toString() : "", value2 != null ? value2.toString() : "", andOr, lBrackets, rBrackets);
 	        }
