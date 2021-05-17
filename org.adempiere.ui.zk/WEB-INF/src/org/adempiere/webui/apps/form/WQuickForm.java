@@ -55,14 +55,14 @@ import org.zkoss.zul.Columns;
  * @author Logilite Technologies
  * @since Nov 03, 2017
  */
-public class WQuickForm extends Window implements EventListener <Event>, DataStatusListener
+public class WQuickForm extends Window implements IQuickForm // EventListener <Event>, DataStatusListener
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5363771364595732977L;
 
-	public Trx						trx					= null;
+	private Trx						trx					= null;
 
 	private Borderlayout			mainLayout			= new Borderlayout();
 	private AbstractADWindowContent	adWinContent		= null;

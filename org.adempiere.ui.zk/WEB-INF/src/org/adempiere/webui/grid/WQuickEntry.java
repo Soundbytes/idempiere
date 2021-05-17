@@ -61,7 +61,7 @@ import org.zkoss.zul.Vlayout;
  * Author: Carlos Ruiz
  */
 
-public class WQuickEntry extends Window implements EventListener<Event>, ValueChangeListener
+public class WQuickEntry extends Window implements IQuickEntry, EventListener<Event>, ValueChangeListener
 {
 	/**
 	 * 
@@ -81,8 +81,8 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	List<GridField> quickFields = new ArrayList<GridField>();
 	protected List<WEditor> quickEditors = new ArrayList<WEditor>();
 	List<Object> initialValues = new ArrayList<Object>();
-	List<GridTab> quickTabs = new ArrayList<GridTab>();
-	List<PO> quickPOs = new ArrayList<PO>();
+	protected List<GridTab> quickTabs = new ArrayList<GridTab>();
+	protected List<PO> quickPOs = new ArrayList<PO>();
 
 	/** Read Only				*/
 	private boolean m_readOnly = false;
@@ -116,7 +116,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		parent_WindowNo = WindowNo;
 		parent_TabNo = TabNo;
 		m_WindowNo = SessionManager.getAppDesktop().registerWindow(this);
-		log.info("R/O=" + m_readOnly);
+		log.info("R/O=" + isReadOnly());
 
 		try
 		{
@@ -141,7 +141,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 		m_AD_Window_ID = AD_Window_ID;
 		parent_WindowNo = 0;
 		m_WindowNo = 0;
-		log.info("R/O=" + m_readOnly);
+		log.info("R/O=" + isReadOnly());
 	}	//	WQuickEntry
 
 	/**
@@ -217,7 +217,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 					if (! isValidQuickEntryType(field.getAD_Reference_ID()))
 						continue;
 			        WEditor editor = WebEditorFactory.getEditor(gridfield, false);
-			        if (m_readOnly)
+			        if (isReadOnly())
 			        	editor.setReadWrite(false);
 			        if (gridfield.isMandatory(false))
 			        	editor.setMandatory(true);
@@ -286,7 +286,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	 * @return
 	 */
 	public boolean isAvailableQuickEdit (){
-		return isHasField && !m_readOnly;
+		return isHasField && !isReadOnly();
 	}
 	
 	/**
@@ -298,6 +298,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	public boolean loadRecord (int Record_ID)
 	{
 		String parentColumn = null;
+		quickPOs = new ArrayList<PO>();
 		for (int idxt = 0; idxt < quickTabs.size(); idxt++) {
 			GridTab gridtab = quickTabs.get(idxt);
 			int id = 0;
@@ -513,7 +514,7 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 
 	public void onEvent(Event e) throws Exception
 	{
-		if (m_readOnly)
+		if (isReadOnly())
 			this.detach();
 
 		//	OK pressed
@@ -609,8 +610,22 @@ public class WQuickEntry extends Window implements EventListener<Event>, ValueCh
 	/**
 	 *	get size quickfields
 	 */
-	public int getQuickFields(){
+	public final int getQuickFields(){
 		return quickFields.size();
 	}// size of quickfields
+
+	/**
+	 * get readOnly 
+	 */
+	protected final boolean isReadOnly() {
+		return m_readOnly;
+	}
+
+	/**
+	 * @return the confirmPanel
+	 */
+	protected final ConfirmPanel getConfirmPanel() {
+		return confirmPanel;
+	}
 
 } // WQuickEntry

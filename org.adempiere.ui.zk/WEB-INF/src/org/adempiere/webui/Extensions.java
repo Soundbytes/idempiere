@@ -31,6 +31,8 @@ import org.adempiere.webui.apps.IProcessParameterListener;
 import org.adempiere.webui.apps.graph.IChartRendererService;
 import org.adempiere.webui.factory.IDashboardGadgetFactory;
 import org.adempiere.webui.factory.IFormFactory;
+import org.adempiere.webui.factory.IQuickEntryFactory;
+import org.adempiere.webui.grid.IQuickEntry;
 import org.adempiere.webui.panel.ADForm;
 import org.compiere.grid.ICreateFrom;
 import org.compiere.grid.ICreateFromFactory;
@@ -81,6 +83,62 @@ public class Extensions {
 		}
 		return null;
 	}
+	
+	private final static CCache<String, IServiceReferenceHolder<IQuickEntryFactory>> s_quickEntryFactoryCache = new CCache<>(null, "IFormFactory", 100, false);
+	
+	private static IQuickEntryFactory getQuickEntryService(String AdWindowID) {
+		IServiceReferenceHolder<IQuickEntryFactory> cache = s_quickEntryFactoryCache.get(AdWindowID);
+		if (cache != null) {
+			IQuickEntryFactory service = cache.getService();
+			if (service != null) {
+				return service;
+			}
+			s_quickEntryFactoryCache.remove(AdWindowID);
+		}
+		List<IServiceReferenceHolder<IQuickEntryFactory>> factories = Service.locator().list(IQuickEntryFactory.class).getServiceReferences();
+		if (factories != null) {
+			for(IServiceReferenceHolder<IQuickEntryFactory> factory : factories) {
+				IQuickEntryFactory service = factory.getService();
+				if (service != null) {
+					s_quickEntryFactoryCache.put(AdWindowID, factory);
+					return service;
+				}
+			}
+		}
+		return null;		
+	}
+	
+	
+	/**
+	 *
+	 * @param AD_Window_ID 
+	 * @return IFormController instance or null if quickEntryId not found
+	 */
+	public static IQuickEntry getQuickEntry(int AD_Window_ID) {
+		IQuickEntryFactory service = getQuickEntryService(String.valueOf(AD_Window_ID));
+		if (service != null) {
+			IQuickEntry quickEntry = service.newQuickEntryInstance(AD_Window_ID);
+			if (quickEntry != null)
+				return quickEntry;
+		}
+		return null;
+	}
+	
+	/**
+	 *
+	 * @param AD_Window_ID 
+	 * @return IFormController instance or null if quickEntryId not found
+	 */
+	public static IQuickEntry getQuickEntry(int WindowNo, int TabNo, int AD_Window_ID) {
+		IQuickEntryFactory service = getQuickEntryService(String.valueOf(AD_Window_ID));
+		if (service != null) {
+			IQuickEntry quickEntry = service.newQuickEntryInstance(WindowNo, TabNo, AD_Window_ID);
+			if (quickEntry != null)
+				return quickEntry;
+		}
+		return null;
+	}		
+
 	
 	private final static CCache<String, List<IServiceReferenceHolder<IProcessParameterListener>>> s_processParameterListenerCache = new CCache<>(null, "List<IProcessParameterListener>", 100, false);
 	
