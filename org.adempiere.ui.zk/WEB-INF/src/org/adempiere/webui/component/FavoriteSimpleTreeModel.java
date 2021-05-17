@@ -29,6 +29,7 @@ import org.compiere.model.MTable;
 import org.compiere.model.MToolBarButtonRestrict;
 import org.compiere.model.MTreeNode;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.Util;
@@ -210,7 +211,12 @@ public class FavoriteSimpleTreeModel extends SimpleTreeModel implements EventLis
 			if (mNode.isWindow())
 			{
 				// Check Window access for ReadWrite & New Toolbar button
-				if (!MToolBarButtonRestrict.isNewButtonRestricted(MMenu.get(mNode.getMenu_ID()).getAD_Window_ID()))
+				int windowID = MMenu.get(mNode.getMenu_ID()).getAD_Window_ID();
+				String sql = "SELECT CASE WHEN WindowType IN ('Q','S') THEN 1 else 0 END AS readonly " + 
+						"FROM AD_Window WHERE AD_Window_ID = ? ";
+				
+				int isQueryOnly = DB.getSQLValue(null, sql, windowID);
+				if (!MToolBarButtonRestrict.isNewButtonRestricted(windowID) && isQueryOnly == 1)
 				{
 					Toolbarbutton newBtn = new Toolbarbutton();
 					newBtn.setTooltiptext(Util.cleanAmp(Msg.getMsg(Env.getCtx(), "New")));
