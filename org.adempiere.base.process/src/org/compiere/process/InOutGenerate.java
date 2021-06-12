@@ -53,9 +53,9 @@ public class InOutGenerate extends SvrProcess
 	/**	Manual Selection		*/
 	private boolean 	p_Selection = false;
 	/** Warehouse				*/
-	private int			p_M_Warehouse_ID = 0;
+	protected int			p_M_Warehouse_ID = 0;
 	/** BPartner				*/
-	private int			p_C_BPartner_ID = 0;
+	protected int			p_C_BPartner_ID = 0;
 	/** Promise Date			*/
 	private Timestamp	p_DatePromised = null;
 	/** Include Orders w. unconfirmed Shipments	*/
@@ -79,7 +79,7 @@ public class InOutGenerate extends SvrProcess
 	private int			m_lastC_BPartner_Location_ID = -1;
 
 	/** The Query sql			*/
-	private StringBuffer 		m_sql = null;
+	protected StringBuffer 		m_sql = null;
 
 	
 	/** Storages temp space				*/
@@ -119,15 +119,14 @@ public class InOutGenerate extends SvrProcess
                 p_DateShipped = (Timestamp)para[i].getParameter();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
-			
-			//  juddm - added ability to specify a shipment date from Generate Shipments
-			if (p_DateShipped == null) {
-				m_movementDate = Env.getContextAsDate(getCtx(), Env.DATE);
-				if (m_movementDate == null)
-					m_movementDate = new Timestamp(System.currentTimeMillis());
-			} else
-				m_movementDate = p_DateShipped;
 		}
+		//  juddm - added ability to specify a shipment date from Generate Shipments
+		if (p_DateShipped == null) {
+			m_movementDate = Env.getContextAsDate(getCtx(), Env.DATE);
+			if (m_movementDate == null)
+				m_movementDate = new Timestamp(System.currentTimeMillis());
+		} else
+			m_movementDate = p_DateShipped;
 	}	//	prepare
 
 	/**
@@ -208,7 +207,7 @@ public class InOutGenerate extends SvrProcess
 	 * 	@param pstmt Order Query
 	 *	@return info
 	 */
-	private String generate (PreparedStatement pstmt)
+	protected String generate (PreparedStatement pstmt)
 	{
 
 		ResultSet rs = null;
@@ -432,7 +431,7 @@ public class InOutGenerate extends SvrProcess
 	 *	@param storages storage info
 	 *	@param force force delivery
 	 */
-	private void createLine (MOrder order, MOrderLine orderLine, BigDecimal qty, 
+	protected void createLine (MOrder order, MOrderLine orderLine, BigDecimal qty, 
 		MStorageOnHand[] storages, boolean force)
 	{
 		//	Complete last Shipment - can have multiple shipments
@@ -600,7 +599,7 @@ public class InOutGenerate extends SvrProcess
 	/**
 	 * 	Complete Shipment
 	 */
-	private void completeShipment()
+	protected void completeShipment()
 	{
 		if (m_shipment != null)
 		{
