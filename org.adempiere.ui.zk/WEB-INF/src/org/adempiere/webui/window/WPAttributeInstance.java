@@ -174,31 +174,31 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	/**	Table Column Layout Info			*/
 	private static ColumnInfo[] s_layout = new ColumnInfo[] 
 	{
-		new ColumnInfo(" ", "s.M_AttributeSetInstance_ID", IDColumn.class),
+		new ColumnInfo(" ", "asi.M_AttributeSetInstance_ID", IDColumn.class),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "Description"), "asi.Description", String.class),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "Lot"), "asi.Lot", String.class),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "SerNo"), "asi.SerNo", String.class), 
 		new ColumnInfo(Msg.translate(Env.getCtx(), "GuaranteeDate"), "asi.GuaranteeDate", Timestamp.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "M_Locator_ID"), "l.Value", KeyNamePair.class, "s.M_Locator_ID"),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyAvailable"), "SUM(s.QtyOnHand - s.QtyReserved)", Double.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOnHand"), "SUM(s.QtyOnHand)", Double.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyReserved"), "SUM(s.QtyReserved)", Double.class),
-		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOrdered"), "SUM(s.QtyOrdered)", Double.class),
+		new ColumnInfo(Msg.translate(Env.getCtx(), "M_Locator_ID"), "COALESCE(l.Value,'') AS Value", KeyNamePair.class, "s.M_Locator_ID"),
+		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOnHand"), "COALESCE(s.QtyOnHand, 0) AS QtyOnHand", Double.class),
+		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyReserved"), "COALESCE(s.QtyReserved, 0) AS QtyReserved", Double.class),
+		new ColumnInfo(Msg.translate(Env.getCtx(), "QtyOrdered"), "COALESCE(s.QtyOrdered, 0) AS QtyOrdered", Double.class),
 		//	See RV_Storage
 		new ColumnInfo(Msg.translate(Env.getCtx(), "GoodForDays"), "(daysbetween(asi.GuaranteeDate, getDate()))-p.GuaranteeDaysMin", Integer.class, true, true, null),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "ShelfLifeDays"), "daysbetween(asi.GuaranteeDate, getDate())", Integer.class),
 		new ColumnInfo(Msg.translate(Env.getCtx(), "ShelfLifeRemainingPct"), "CASE WHEN p.GuaranteeDays > 0 THEN TRUNC(((daysbetween(asi.GuaranteeDate, getDate()))/p.GuaranteeDays)*100) ELSE 0 END", Integer.class),
 	};
 	/**	From Clause							*/
-	private static String s_sqlFrom = "M_Storage s"
-		+ " INNER JOIN M_Locator l ON (s.M_Locator_ID=l.M_Locator_ID)"
-		+ " INNER JOIN M_Product p ON (s.M_Product_ID=p.M_Product_ID)"
-		+ " LEFT OUTER JOIN M_AttributeSetInstance asi ON (s.M_AttributeSetInstance_ID=asi.M_AttributeSetInstance_ID)";
+	private static String s_sqlFrom = "M_AttributeSetInstance asi "
+		+ "left join M_Lot lot on (asi.m_Lot_id = lot.M_Lot_ID) "
+		+ "left join M_Storage s on (asi.M_AttributeSetInstance_ID = s.M_AttributeSetInstance_ID) "
+		+ "left join M_Locator l on (s.M_Locator_ID = l.M_Locator_ID) "
+		+ "inner join M_Product p on (lot.M_Product_ID = p.M_Product_ID) ";
 	/** Where Clause						*/
-	private static String s_sqlWhere = "s.M_Product_ID=? AND l.M_Warehouse_ID=?"; 
-	private static String s_sqlWhereWithoutWarehouse = " s.M_Product_ID=?"; 
+	private static String s_sqlWhere = "lot.M_Product_ID=? AND (l.M_Warehouse_ID=? OR l.M_Locator_ID is null)"; 
+	private static String s_sqlWhereWithoutWarehouse = " lot.M_Product_ID=?"; 
 
-	private String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0)";
+	private String	m_sqlNonZero = " AND (s.QtyOnHand<>0 OR s.QtyReserved<>0 OR s.QtyOrdered<>0 OR s.M_Locator_ID is null)";
 	private String	m_sqlMinLife = "";
 
 	/**
@@ -255,9 +255,8 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 		}	//	BPartner != 0
 
 		m_sql = m_table.prepareTable (s_layout, s_sqlFrom, 
-					m_M_Warehouse_ID == 0 ? s_sqlWhereWithoutWarehouse : s_sqlWhere, false, "s")
-				+ " GROUP BY s.M_AttributeSetInstance_ID,asi.Description,asi.Lot,asi.SerNo,asi.GuaranteeDate,l.Value,s.M_Locator_ID,p.GuaranteeDaysMin,p.GuaranteeDays"
-				+ " ORDER BY asi.GuaranteeDate, SUM(s.QtyOnHand)";	//	oldest, smallest first
+					m_M_Warehouse_ID == 0 ? s_sqlWhereWithoutWarehouse : s_sqlWhere, false, "asi")
+				+ " ORDER BY asi.GuaranteeDate, QtyOnHand";	//	oldest, smallest first
 		//
 		m_table.addEventListener(Events.ON_SELECT, this);
 		//
@@ -270,7 +269,7 @@ public class WPAttributeInstance extends Window implements EventListener<Event>
 	private void refresh()
 	{
 		String sql = m_sql;
-		int pos = m_sql.lastIndexOf(" GROUP BY ");
+		int pos = m_sql.lastIndexOf(" ORDER BY ");
 		if (!showAll.isChecked())
 		{
 			sql = m_sql.substring(0, pos) 
