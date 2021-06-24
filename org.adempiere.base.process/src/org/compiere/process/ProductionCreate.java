@@ -23,11 +23,11 @@ import org.compiere.util.Env;
  */
 public class ProductionCreate extends SvrProcess {
 
-	private int p_M_Production_ID=0;
-	private MProduction m_production = null;
-	private boolean mustBeStocked = false;  //not used
-	private boolean recreate = false;
-	private BigDecimal newQty = null;
+	protected int p_M_Production_ID=0;
+	protected MProduction m_production = null;
+	protected boolean mustBeStocked = false;  //not used
+	protected boolean recreate = false;
+	protected BigDecimal newQty = null;
 	//private int p_M_Locator_ID=0;
 	
 	
