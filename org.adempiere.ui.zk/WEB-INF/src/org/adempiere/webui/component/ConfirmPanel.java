@@ -347,11 +347,10 @@ public final class ConfirmPanel extends Div
     /**
      * Add checkbox to center panel
      * @param cb
-     * @param labelText
      */
     public void addComponentsCenter(Checkbox cb){
-    	cb.setStyle("display: inline-block; padding: 4px 20px; line-height: 20px;");
     	pnlBtnCenter.appendChild(cb);
+    	
     }    
     
     /**
